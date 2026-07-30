@@ -1,0 +1,209 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum Role {
+  CITIZEN
+  OFFICER
+  ADMIN
+}
+
+enum ApplicationStatus {
+  SUBMITTED
+  VERIFIED
+  UNDER_REVIEW
+  APPROVED
+  REJECTED
+  DOCUMENT_REQUESTED
+  COMPLETED
+}
+
+enum SchemeCategory {
+  AGRICULTURE
+  EDUCATION
+  SCHOLARSHIPS
+  HEALTHCARE
+  HOUSING
+  EMPLOYMENT
+  WOMEN_EMPOWERMENT
+  SENIOR_CITIZENS
+  DISABILITY
+  STARTUP
+  MSME
+  PENSION
+  INSURANCE
+  DIGITAL_INDIA
+  RURAL_DEVELOPMENT
+  SKILL_DEVELOPMENT
+  FINANCIAL_ASSISTANCE
+  CHILD_WELFARE
+}
+
+model User {
+  id            String         @id @default(uuid())
+  name          String
+  email         String         @unique
+  phone         String?        @unique
+  role          Role           @default(CITIZEN)
+  aadhaarHash   String?
+  panNumber     String?
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  profile       Profile?
+  applications  Application[]
+  documents     Document[]
+  notifications Notification[]
+  activityLogs  ActivityLog[]
+  officer       Officer?
+}
+
+model Profile {
+  id             String    @id @default(uuid())
+  userId         String    @unique
+  user           User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  age            Int?
+  gender         String?
+  state          String?
+  district       String?
+  pincode        String?
+  incomeAnnual   Float?
+  occupation     String?
+  isFarmer       Boolean   @default(false)
+  isStudent      Boolean   @default(false)
+  isDisability   Boolean   @default(false)
+  category       String?   // GENERAL, OBC, SC, ST, EWS
+  education      String?
+  familySize     Int       @default(1)
+  hasExistingBen Boolean   @default(false)
+  preferredLang  String    @default("en")
+  ekycVerified   Boolean   @default(false)
+}
+
+model Department {
+  id          String             @id @default(uuid())
+  code        String             @unique
+  name        String
+  ministry    String
+  description String?
+  contactEmail String?
+  contactPhone String?
+  schemes     GovernmentScheme[]
+  officers    Officer[]
+  createdAt   DateTime           @default(now())
+}
+
+model Officer {
+  id           String        @id @default(uuid())
+  userId       String        @unique
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  departmentId String
+  department   Department    @relation(fields: [departmentId], references: [id])
+  designation  String
+  region       String
+}
+
+model GovernmentScheme {
+  id               String            @id @default(uuid())
+  code             String            @unique
+  title            String
+  shortDescription String
+  description      String
+  category         SchemeCategory
+  departmentId     String
+  department       Department        @relation(fields: [departmentId], references: [id])
+  level            String            @default("Central") // Central / State
+  state            String?           // Null if Central
+  maxBenefit       String
+  benefitType      String            // Financial, Insurance, Subsidy, Pension, Training
+  deadline         DateTime?
+  active           Boolean           @default(true)
+  eligibilityRules EligibilityRule[]
+  requiredDocs     String[]
+  applicationSteps String[]
+  applications     Application[]
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+}
+
+model EligibilityRule {
+  id         String           @id @default(uuid())
+  schemeId   String
+  scheme     GovernmentScheme @relation(fields: [schemeId], references: [id], onDelete: Cascade)
+  minAge     Int?
+  maxAge     Int?
+  maxIncome  Float?
+  gender     String?          // ALL, MALE, FEMALE, TRANSGENDER
+  categories String[]         // GENERAL, OBC, SC, ST
+  occupations String[]
+  requiresFarmer Boolean      @default(false)
+  requiresStudent Boolean     @default(false)
+  requiresDisability Boolean  @default(false)
+}
+
+model Application {
+  id           String            @id @default(uuid())
+  applicationNo String           @unique
+  userId       String
+  user         User              @relation(fields: [userId], references: [id])
+  schemeId     String
+  scheme       GovernmentScheme  @relation(fields: [schemeId], references: [id])
+  status       ApplicationStatus @default(SUBMITTED)
+  remarks      String?
+  submittedAt  DateTime          @default(now())
+  updatedAt    DateTime          @updatedAt
+  documents    Document[]
+}
+
+model Document {
+  id            String       @id @default(uuid())
+  userId        String
+  user          User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  applicationId String?
+  application   Application? @relation(fields: [applicationId], references: [id])
+  docType       String       // Aadhaar, PAN, Income, Caste, Domicile, BankPassbook
+  docNumber     String?
+  fileUrl       String
+  isVerified    Boolean      @default(false)
+  ocrExtracted  Json?
+  uploadedAt    DateTime     @default(now())
+}
+
+model Notification {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title     String
+  message   String
+  type      String   // SMS, EMAIL, PUSH
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
+
+model ActivityLog {
+  id        String   @id @default(uuid())
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id])
+  action    String
+  details   String
+  ipAddress String?
+  createdAt DateTime @default(now())
+}
+
+model AssistanceCenter {
+  id        String   @id @default(uuid())
+  name      String
+  type      String   // CSC, DIGITAL_SEVA, TALUKA_OFFICE, BANK
+  address   String
+  district  String
+  state     String
+  pincode   String
+  phone     String
+  lat       Float
+  lng       Float
+  timing    String
+}

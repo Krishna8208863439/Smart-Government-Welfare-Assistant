@@ -1,0 +1,29 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - DATABASE_URL=postgresql://jansahay_user:jansahay_pass@postgres:5432/jansahay_db?schema=public
+      - NODE_ENV=production
+    depends_on:
+      - postgres
+
+  postgres:
+    image: postgres:15-alpine
+    container_name: jansahay_postgres
+    environment:
+      POSTGRES_USER: jansahay_user
+      POSTGRES_PASSWORD: jansahay_pass
+      POSTGRES_DB: jansahay_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:
