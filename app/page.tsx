@@ -1,61 +1,41 @@
 'use client';
 
-import React, { useState } from 'react';
+import React from 'react';
 import Link from 'next/link';
 import { 
   Sparkles, 
   Search, 
   ArrowRight, 
-  ShieldCheck, 
   CheckCircle2, 
-  Users, 
   IndianRupee, 
   FileCheck2, 
   Bot, 
   ChevronRight, 
   Zap, 
-  Smartphone, 
-  Building2,
-  Award,
-  HelpCircle,
-  Clock,
-  Layers,
-  Heart,
-  FileText
+  Award, 
+  Layers, 
+  FileText,
+  User,
+  ShieldCheck,
+  UserPlus,
+  Lock
 } from 'lucide-react';
 import { Navbar } from '@/components/navbar';
 import { Footer } from '@/components/footer';
 import { IndiaMapVisualizer } from '@/components/landing/india-map-visualizer';
 import { SCHEME_CATEGORIES, SCHEMES_DATABASE } from '@/lib/schemes-data';
+import { useTranslation } from '@/components/accessibility-provider';
+import { useAuth } from '@/lib/auth-context';
 
 export default function LandingPage() {
-  const [searchQuery, setSearchQuery] = useState('');
-  const [activeFaq, setActiveFaq] = useState<number | null>(0);
+  const { t, language } = useTranslation();
+  const { isAuthenticated, user } = useAuth();
 
   const stats = [
-    { label: 'Active Schemes Registered', value: '1,450+', icon: Layers, color: 'text-gov-blue' },
-    { label: 'Total Benefits Disbursed', value: '₹2.84 Lakh Cr', icon: IndianRupee, color: 'text-emerald-500' },
-    { label: 'Applications Processed', value: '14.8 Crore+', icon: FileCheck2, color: 'text-gov-saffron' },
-    { label: 'Success Match Rate', value: '99.4%', icon: Award, color: 'text-purple-500' }
-  ];
-
-  const faqs = [
-    {
-      q: 'How does JanSahay AI match me with government schemes?',
-      a: 'JanSahay AI uses advanced NLP and rule-based similarity engines to evaluate your age, income, occupation, location, and social category against 1,000+ central and state scheme guidelines in real-time, giving you an exact match score.'
-    },
-    {
-      q: 'Is my Aadhaar and personal document data secure?',
-      a: 'Yes, absolutely. JanSahay AI uses AES-256 bank-grade encryption, follows MeitY cybersecurity directives, and integrates with official DigiLocker sandboxes. Your raw document files are never sold or shared with unauthorized third parties.'
-    },
-    {
-      q: 'Can I apply for schemes directly through JanSahay AI?',
-      a: 'Yes! The step-by-step Application Wizard allows you to upload documents, auto-fill verified forms via OCR, and submit applications directly to department portals without visiting physical offices or paying middlemen.'
-    },
-    {
-      q: 'Does JanSahay AI support regional Indian languages?',
-      a: 'JanSahay AI supports 12 major Indian languages including Hindi, English, Marathi, Gujarati, Tamil, Telugu, Kannada, Malayalam, Bengali, Punjabi, Odia, and Urdu both in text and voice interface.'
-    }
+    { label: t('stat_schemes_label', 'Active Schemes Registered'), value: '1,450+', icon: Layers, color: 'text-gov-blue' },
+    { label: t('stat_disbursed_label', 'Total Benefits Disbursed'), value: '₹2.84 Lakh Cr', icon: IndianRupee, color: 'text-emerald-500' },
+    { label: t('stat_apps_label', 'Applications Processed'), value: '14.8 Crore+', icon: FileCheck2, color: 'text-gov-saffron' },
+    { label: t('stat_match_label', 'Success Match Rate'), value: '99.4%', icon: Award, color: 'text-purple-500' }
   ];
 
   return (
@@ -70,61 +50,84 @@ export default function LandingPage() {
           <div className="lg:col-span-7 space-y-6 text-center lg:text-left z-10">
             <div className="inline-flex items-center space-x-2 px-3.5 py-1.5 rounded-full bg-gov-blue/10 dark:bg-blue-950/60 border border-gov-blue/20 text-gov-blue dark:text-blue-400 text-xs font-extrabold shadow-sm">
               <Sparkles className="w-4 h-4 text-gov-saffron animate-spin" />
-              <span>Project Viksit Bharat 2026 • AI-Powered Public Welfare Engine</span>
+              <span>{t('hero_badge', 'Project Viksit Bharat 2026 • AI-Powered Public Welfare Engine')}</span>
             </div>
 
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black tracking-tight text-slate-900 dark:text-white leading-[1.15]">
-              Find Every Government Scheme You're{' '}
+              {t('hero_title_1', "Find Every Government Scheme You're")}{' '}
               <span className="bg-gradient-to-r from-gov-blue via-gov-saffron to-gov-green bg-clip-text text-transparent">
-                Eligible For
+                {t('hero_title_2', 'Eligible For')}
               </span>
             </h1>
 
             <p className="text-base sm:text-lg text-slate-600 dark:text-slate-300 max-w-2xl font-normal leading-relaxed">
-              Discover central, state, and local government schemes in minutes using AI. Eliminate confusion, paperwork, and middlemen with instant eligibility checking and automated application filling.
+              {t('hero_desc', 'Discover central, state, and local government schemes in minutes using AI. Eliminate confusion, paperwork, and middlemen with instant eligibility checking and automated application filling.')}
             </p>
 
-            {/* Quick Hero Buttons */}
+            {/* Quick Hero Action Buttons */}
             <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-3 pt-2">
-              <Link
-                href="/eligibility"
-                className="w-full sm:w-auto px-7 py-3.5 bg-gradient-to-r from-gov-blue to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-extrabold text-base rounded-xl shadow-lg hover:shadow-xl transition-all flex items-center justify-center space-x-2"
-              >
-                <Zap className="w-5 h-5 text-amber-300" />
-                <span>Check Eligibility Now</span>
-                <ArrowRight className="w-5 h-5" />
-              </Link>
+              {!isAuthenticated ? (
+                <>
+                  <Link
+                    href="/register"
+                    className="w-full sm:w-auto px-8 py-4 bg-gradient-to-r from-gov-blue to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-extrabold text-base rounded-2xl shadow-xl hover:shadow-2xl transition-all flex items-center justify-center space-x-2.5"
+                  >
+                    <UserPlus className="w-5 h-5 text-amber-300" />
+                    <span>{t('nav_register', 'Create Account')}</span>
+                    <ArrowRight className="w-5 h-5" />
+                  </Link>
 
-              <Link
-                href="/schemes"
-                className="w-full sm:w-auto px-6 py-3.5 bg-white dark:bg-slate-800 text-slate-800 dark:text-white font-bold text-base rounded-xl border border-slate-300 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 shadow-sm transition-all flex items-center justify-center space-x-2"
-              >
-                <Search className="w-5 h-5 text-gov-blue" />
-                <span>Explore Schemes</span>
-              </Link>
+                  <Link
+                    href="/login"
+                    className="w-full sm:w-auto px-7 py-4 bg-white dark:bg-slate-800 text-slate-800 dark:text-white font-bold text-base rounded-2xl border border-slate-300 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 shadow-md transition-all flex items-center justify-center space-x-2"
+                  >
+                    <User className="w-5 h-5 text-gov-blue" />
+                    <span>{t('nav_login', 'Sign In / Login')}</span>
+                  </Link>
+                </>
+              ) : (
+                <>
+                  <Link
+                    href="/eligibility"
+                    className="w-full sm:w-auto px-7 py-3.5 bg-gradient-to-r from-gov-blue to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-extrabold text-base rounded-xl shadow-lg hover:shadow-xl transition-all flex items-center justify-center space-x-2"
+                  >
+                    <Zap className="w-5 h-5 text-amber-300" />
+                    <span>{t('hero_btn_eligibility', 'Check Eligibility Now')}</span>
+                    <ArrowRight className="w-5 h-5" />
+                  </Link>
 
-              <Link
-                href="/ai-assistant"
-                className="w-full sm:w-auto px-6 py-3.5 bg-amber-500/10 text-amber-700 dark:text-amber-300 font-bold text-base rounded-xl border border-amber-500/30 hover:bg-amber-500/20 shadow-sm transition-all flex items-center justify-center space-x-2"
-              >
-                <Bot className="w-5 h-5 text-amber-600 dark:text-amber-400" />
-                <span>Talk to AI Assistant</span>
-              </Link>
+                  <Link
+                    href="/schemes"
+                    className="w-full sm:w-auto px-6 py-3.5 bg-white dark:bg-slate-800 text-slate-800 dark:text-white font-bold text-base rounded-xl border border-slate-300 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 shadow-sm transition-all flex items-center justify-center space-x-2"
+                  >
+                    <Search className="w-5 h-5 text-gov-blue" />
+                    <span>{t('hero_btn_explore', 'Explore Schemes')}</span>
+                  </Link>
+
+                  <Link
+                    href="/ai-assistant"
+                    className="w-full sm:w-auto px-6 py-3.5 bg-amber-500/10 text-amber-700 dark:text-amber-300 font-bold text-base rounded-xl border border-amber-500/30 hover:bg-amber-500/20 shadow-sm transition-all flex items-center justify-center space-x-2"
+                  >
+                    <Bot className="w-5 h-5 text-amber-600 dark:text-amber-400" />
+                    <span>{t('hero_btn_ai', 'Talk to AI Assistant')}</span>
+                  </Link>
+                </>
+              )}
             </div>
 
             {/* Trust Badges */}
             <div className="pt-4 flex flex-wrap items-center justify-center lg:justify-start gap-6 text-xs text-slate-500 dark:text-slate-400 font-medium">
               <span className="flex items-center space-x-1">
                 <CheckCircle2 className="w-4 h-4 text-emerald-500" />
-                <span>MeitY Standard Certified</span>
+                <span>{t('hero_badge_meity', 'MeitY Standard Certified')}</span>
               </span>
               <span className="flex items-center space-x-1">
                 <CheckCircle2 className="w-4 h-4 text-emerald-500" />
-                <span>No Middlemen / Zero Fee</span>
+                <span>{t('hero_badge_no_middlemen', 'No Middlemen / Zero Fee')}</span>
               </span>
               <span className="flex items-center space-x-1">
                 <CheckCircle2 className="w-4 h-4 text-emerald-500" />
-                <span>12 Indian Languages</span>
+                <span>{t('hero_badge_languages', '3 Indian Languages (EN/HI/MR)')}</span>
               </span>
             </div>
 
@@ -162,11 +165,18 @@ export default function LandingPage() {
       <section className="py-16 max-w-7xl mx-auto px-4">
         <div className="flex flex-col md:flex-row md:items-end justify-between mb-10">
           <div>
-            <span className="text-gov-saffron font-bold text-xs tracking-wider uppercase">Government Categories</span>
-            <h2 className="text-3xl font-extrabold text-slate-900 dark:text-white mt-1">Explore Welfare Categories</h2>
+            <span className="text-gov-saffron font-bold text-xs tracking-wider uppercase">
+              {language === 'mr' ? 'सरकारी वर्गवारी' : language === 'hi' ? 'सरकारी श्रेणियां' : 'Government Categories'}
+            </span>
+            <h2 className="text-3xl font-extrabold text-slate-900 dark:text-white mt-1">
+              {language === 'mr' ? 'कल्याणकारी योजनांची वर्गवारी' : language === 'hi' ? 'कल्याणकारी योजनाओं की श्रेणियां' : 'Explore Welfare Categories'}
+            </h2>
           </div>
-          <Link href="/schemes" className="inline-flex items-center space-x-1 text-gov-blue dark:text-blue-400 font-bold text-sm hover:underline mt-2 md:mt-0">
-            <span>View All 18+ Categories</span>
+          <Link 
+            href={isAuthenticated ? '/schemes' : '/login'} 
+            className="inline-flex items-center space-x-1 text-gov-blue dark:text-blue-400 font-bold text-sm hover:underline mt-2 md:mt-0"
+          >
+            <span>{language === 'mr' ? 'सर्व वर्गवारी पहा' : language === 'hi' ? 'सभी श्रेणियां देखें' : 'View All 18+ Categories'}</span>
             <ArrowRight className="w-4 h-4" />
           </Link>
         </div>
@@ -175,7 +185,7 @@ export default function LandingPage() {
           {SCHEME_CATEGORIES.map((cat) => (
             <Link
               key={cat.id}
-              href={`/schemes?cat=${cat.id}`}
+              href={isAuthenticated ? `/schemes?cat=${cat.id}` : '/login'}
               className="group glass-panel p-5 rounded-2xl border border-slate-200 dark:border-slate-800 hover:border-gov-blue dark:hover:border-blue-500 hover:shadow-lg transition-all flex flex-col items-center text-center space-y-3"
             >
               <div className={`w-12 h-12 rounded-xl flex items-center justify-center font-bold transition-transform group-hover:scale-110 ${cat.color}`}>
@@ -194,11 +204,17 @@ export default function LandingPage() {
         <div className="max-w-7xl mx-auto px-4">
           <div className="text-center max-w-3xl mx-auto mb-12">
             <span className="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-extrabold text-xs px-3 py-1 rounded-full uppercase border border-emerald-500/20">
-              National Priority Schemes
+              {language === 'mr' ? 'प्रमुख राष्ट्रीय योजना' : language === 'hi' ? 'राष्ट्रीय प्राथमिकता योजनाएं' : 'National Priority Schemes'}
             </span>
-            <h2 className="text-3xl font-extrabold text-slate-900 dark:text-white mt-3">Popular Government Flagship Schemes</h2>
+            <h2 className="text-3xl font-extrabold text-slate-900 dark:text-white mt-3">
+              {language === 'mr' ? 'लोकप्रिय सरकारी फ्लॅगशिप योजना' : language === 'hi' ? 'लोकप्रिय सरकारी प्रमुख योजनाएं' : 'Popular Government Flagship Schemes'}
+            </h2>
             <p className="text-sm text-slate-600 dark:text-slate-400 mt-2">
-              Discover active central and state welfare initiatives with high beneficiary payouts and direct bank transfer support.
+              {language === 'mr' 
+                ? 'थेट बँक हस्तांतरण (DBT) समर्थनासह सक्रिय केंद्र आणि राज्य कल्याणकारी उपक्रम शोधा.'
+                : language === 'hi'
+                ? 'प्रत्यक्ष बैंक हस्तांतरण (DBT) सहायता के साथ सक्रिय केंद्रीय और राज्य कल्याणकारी योजनाओं की खोज करें।'
+                : 'Discover active central and state welfare initiatives with high beneficiary payouts and direct bank transfer support.'}
             </p>
           </div>
 
@@ -225,25 +241,28 @@ export default function LandingPage() {
                   </p>
 
                   <div className="bg-slate-50 dark:bg-slate-800/80 p-3 rounded-xl border border-slate-200/80 dark:border-slate-700/80 flex items-center justify-between">
-                    <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">Benefit:</span>
+                    <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">
+                      {language === 'mr' ? 'लाभ:' : language === 'hi' ? 'लाभ:' : 'Benefit:'}
+                    </span>
                     <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400">{scheme.maxBenefit}</span>
                   </div>
                 </div>
 
                 <div className="pt-5 mt-5 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between">
                   <Link
-                    href={`/schemes/${scheme.id}`}
+                    href={isAuthenticated ? `/schemes/${scheme.id}` : '/login'}
                     className="text-xs font-bold text-slate-700 dark:text-slate-300 hover:text-gov-blue dark:hover:text-blue-400 flex items-center space-x-1"
                   >
-                    <span>Read Requirements</span>
+                    <span>{language === 'mr' ? 'तपशील वाचा' : language === 'hi' ? 'विवरण पढ़ें' : 'Read Requirements'}</span>
                     <ChevronRight className="w-3.5 h-3.5" />
                   </Link>
 
                   <Link
-                    href={`/apply/${scheme.id}`}
-                    className="px-3.5 py-1.5 bg-gov-blue text-white rounded-lg text-xs font-bold shadow hover:bg-blue-700 transition-colors"
+                    href={isAuthenticated ? `/apply/${scheme.id}` : '/register'}
+                    className="px-3.5 py-1.5 bg-gov-blue text-white rounded-lg text-xs font-bold shadow hover:bg-blue-700 transition-colors flex items-center space-x-1"
                   >
-                    Apply Now
+                    {!isAuthenticated && <Lock className="w-3 h-3 mr-1" />}
+                    <span>{isAuthenticated ? (language === 'mr' ? 'अर्ज करा' : language === 'hi' ? 'आवेदन करें' : 'Apply Now') : (language === 'mr' ? 'नोंदणी करा' : language === 'hi' ? 'साइन इन करें' : 'Get Started')}</span>
                   </Link>
                 </div>
               </div>
@@ -255,8 +274,12 @@ export default function LandingPage() {
       {/* How JanSahay AI Works - Flowchart */}
       <section className="py-16 max-w-7xl mx-auto px-4">
         <div className="text-center max-w-3xl mx-auto mb-12">
-          <span className="text-gov-saffron font-bold text-xs uppercase tracking-wider">Simple 4-Step Process</span>
-          <h2 className="text-3xl font-extrabold text-slate-900 dark:text-white mt-1">How JanSahay AI Works</h2>
+          <span className="text-gov-saffron font-bold text-xs uppercase tracking-wider">
+            {t('steps_heading_sub', 'Simple 4-Step Process')}
+          </span>
+          <h2 className="text-3xl font-extrabold text-slate-900 dark:text-white mt-1">
+            {t('steps_heading', 'How JanSahay AI Works')}
+          </h2>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
@@ -264,9 +287,9 @@ export default function LandingPage() {
             <div className="w-12 h-12 rounded-2xl bg-gov-blue text-white font-black text-xl flex items-center justify-center mx-auto shadow-md">
               1
             </div>
-            <h4 className="font-bold text-base text-slate-900 dark:text-white">Enter Profile Info</h4>
+            <h4 className="font-bold text-base text-slate-900 dark:text-white">{t('step_1_title', 'Enter Profile Info')}</h4>
             <p className="text-xs text-slate-500 dark:text-slate-400">
-              Provide basic age, income, occupation, and state location details via our quick questionnaire.
+              {t('step_1_desc', 'Provide basic age, income, occupation, and state location details via our quick questionnaire.')}
             </p>
           </div>
 
@@ -274,9 +297,9 @@ export default function LandingPage() {
             <div className="w-12 h-12 rounded-2xl bg-gov-saffron text-white font-black text-xl flex items-center justify-center mx-auto shadow-md">
               2
             </div>
-            <h4 className="font-bold text-base text-slate-900 dark:text-white">AI Scans 1,000+ Schemes</h4>
+            <h4 className="font-bold text-base text-slate-900 dark:text-white">{t('step_2_title', 'AI Scans 1,000+ Schemes')}</h4>
             <p className="text-xs text-slate-500 dark:text-slate-400">
-              Our similarity algorithm instantly checks criteria and generates your percentage match score.
+              {t('step_2_desc', 'Our similarity algorithm instantly checks criteria and generates your percentage match score.')}
             </p>
           </div>
 
@@ -284,9 +307,9 @@ export default function LandingPage() {
             <div className="w-12 h-12 rounded-2xl bg-gov-green text-white font-black text-xl flex items-center justify-center mx-auto shadow-md">
               3
             </div>
-            <h4 className="font-bold text-base text-slate-900 dark:text-white">AI OCR Auto-Fill</h4>
+            <h4 className="font-bold text-base text-slate-900 dark:text-white">{t('step_3_title', 'AI OCR Auto-Fill')}</h4>
             <p className="text-xs text-slate-500 dark:text-slate-400">
-              Upload Aadhaar/PAN cards. Our vision model extracts details and auto-fills application forms.
+              {t('step_3_desc', 'Upload Aadhaar/PAN cards. Our vision model extracts details and auto-fills application forms.')}
             </p>
           </div>
 
@@ -294,43 +317,10 @@ export default function LandingPage() {
             <div className="w-12 h-12 rounded-2xl bg-purple-600 text-white font-black text-xl flex items-center justify-center mx-auto shadow-md">
               4
             </div>
-            <h4 className="font-bold text-base text-slate-900 dark:text-white">Real-Time Status Track</h4>
+            <h4 className="font-bold text-base text-slate-900 dark:text-white">{t('step_4_title', 'Real-Time Status Track')}</h4>
             <p className="text-xs text-slate-500 dark:text-slate-400">
-              Receive direct SMS updates and track verification stages from department officer review to DBT credit.
+              {t('step_4_desc', 'Receive direct SMS updates and track verification stages from department officer review to DBT credit.')}
             </p>
-          </div>
-        </div>
-      </section>
-
-      {/* FAQ Section */}
-      <section className="py-16 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800">
-        <div className="max-w-4xl mx-auto px-4">
-          <div className="text-center mb-10">
-            <HelpCircle className="w-10 h-10 text-gov-blue mx-auto mb-2" />
-            <h2 className="text-3xl font-extrabold text-slate-900 dark:text-white">Frequently Asked Questions</h2>
-            <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">Clear answers regarding welfare discovery, document security, and application processing.</p>
-          </div>
-
-          <div className="space-y-4">
-            {faqs.map((faq, idx) => (
-              <div
-                key={idx}
-                className="border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden transition-all"
-              >
-                <button
-                  onClick={() => setActiveFaq(activeFaq === idx ? null : idx)}
-                  className="w-full p-5 text-left font-bold text-slate-900 dark:text-white flex justify-between items-center hover:bg-slate-50 dark:hover:bg-slate-800/50"
-                >
-                  <span>{faq.q}</span>
-                  <ChevronRight className={`w-5 h-5 text-slate-400 transition-transform ${activeFaq === idx ? 'rotate-90 text-gov-blue' : ''}`} />
-                </button>
-                {activeFaq === idx && (
-                  <div className="p-5 pt-0 text-sm text-slate-600 dark:text-slate-400 leading-relaxed border-t border-slate-100 dark:border-slate-800/50 bg-slate-50/50 dark:bg-slate-900/50">
-                    {faq.a}
-                  </div>
-                )}
-              </div>
-            ))}
           </div>
         </div>
       </section>

@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { useParams, useRouter } from 'next/router';
+import { useParams, useRouter } from 'next/navigation';
 import { 
   CheckCircle2, 
   Upload, 
@@ -13,19 +13,23 @@ import {
   ShieldCheck, 
   User, 
   Building2, 
-  AlertCircle, 
   Download, 
   Clock, 
-  RefreshCw,
-  Eye
+  Check
 } from 'lucide-react';
 import { Navbar } from '@/components/navbar';
 import { Footer } from '@/components/footer';
-import { SCHEMES_DATABASE } from '@/lib/schemes-data';
+import { SCHEMES_DATABASE, getSchemeTitle, getSchemeBenefit } from '@/lib/schemes-data';
 import { parseDocumentOCR, ExtractedDocumentData } from '@/lib/ocr-engine';
+import { useTranslation } from '@/components/accessibility-provider';
+import { useAuth } from '@/lib/auth-context';
 
 export default function ApplicationWizardPage() {
   const params = useParams();
+  const router = useRouter();
+  const { t, language } = useTranslation();
+  const { user } = useAuth();
+
   const schemeId = (params?.schemeId as string) || 'pm-kisan';
   const scheme = SCHEMES_DATABASE.find((s) => s.id === schemeId) || SCHEMES_DATABASE[0];
 
@@ -34,16 +38,16 @@ export default function ApplicationWizardPage() {
 
   // Form State
   const [applicant, setApplicant] = useState({
-    name: 'Rajesh Kumar Sharma',
-    aadhaarNumber: '9812-4512-8912',
+    name: user?.name || 'Rajesh Kumar Sharma',
+    aadhaarNumber: user?.aadhaarNumber || '9812-4512-8912',
     panNumber: 'ABCPS8912K',
     dob: '1988-04-14',
     gender: 'Male',
-    phone: '+91 98765 43210',
-    email: 'rajesh.sharma@example.com',
-    state: 'Uttar Pradesh',
-    district: 'Gautam Buddha Nagar',
-    address: 'H-42, Sector 15, NOIDA, Uttar Pradesh - 201301',
+    phone: user?.phone || '+91 98765 43210',
+    email: user?.email || 'rajesh.sharma@example.com',
+    state: user?.state || 'Maharashtra',
+    district: user?.district || 'Pune',
+    address: 'Plot 42, Shivajinagar, Pune, Maharashtra - 411005',
     annualIncome: 180000,
     bankAccount: '3819001298371',
     ifscCode: 'SBIN0001234',
@@ -71,7 +75,7 @@ export default function ApplicationWizardPage() {
       if (extracted.docType === 'BankPassbook' && extracted.accountNumber) setApplicant((prev) => ({ ...prev, bankAccount: extracted.accountNumber!, ifscCode: extracted.ifscCode || prev.ifscCode }));
 
       setOcrLoading(false);
-    }, 1200);
+    }, 900);
   };
 
   const submitApplication = () => {
@@ -81,25 +85,27 @@ export default function ApplicationWizardPage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-gov-bg dark:bg-gov-darkBg">
+    <div className="min-h-screen flex flex-col bg-gov-bg dark:bg-gov-darkBg transition-colors">
       <Navbar />
 
       {/* Header Stepper */}
       <section className="bg-gradient-to-r from-gov-darkBg via-slate-900 to-gov-darkBg text-white py-8 px-4 border-b border-slate-800">
         <div className="max-w-5xl mx-auto space-y-4">
           <div className="flex justify-between items-center text-xs font-mono text-slate-400">
-            <span>Official Application Portal</span>
-            <span>Scheme: {scheme.title}</span>
+            <span>
+              {language === 'mr' ? 'अधिकृत अर्ज विझार्ड' : language === 'hi' ? 'आधिकारिक आवेदन पोर्टल' : 'Official Application Portal'}
+            </span>
+            <span>Scheme: {getSchemeTitle(scheme, language)}</span>
           </div>
 
           {/* Stepper Indicator */}
           <div className="grid grid-cols-5 gap-2 pt-2">
             {[
-              { id: 1, label: '1. eKYC Auth' },
-              { id: 2, label: '2. OCR Documents' },
-              { id: 3, label: '3. Auto-Filled Form' },
-              { id: 4, label: '4. Final Review' },
-              { id: 5, label: '5. Receipt' }
+              { id: 1, label: language === 'mr' ? '१. ई-केवायसी' : language === 'hi' ? '1. ई-केवाईसी' : '1. eKYC Auth' },
+              { id: 2, label: language === 'mr' ? '२. कागदपत्रे ओसीआर' : language === 'hi' ? '2. ओसीआर दस्तावेज़' : '2. OCR Documents' },
+              { id: 3, label: language === 'mr' ? '३. ऑटो-फिल अर्ज' : language === 'hi' ? '3. ऑटो-फिल फॉर्म' : '3. Auto-Filled Form' },
+              { id: 4, label: language === 'mr' ? '४. पुनरावलोकन' : language === 'hi' ? '4. अंतिम समीक्षा' : '4. Final Review' },
+              { id: 5, label: language === 'mr' ? '५. पावती' : language === 'hi' ? '5. रसीद' : '5. Receipt' }
             ].map((s) => (
               <div
                 key={s.id}
@@ -122,14 +128,20 @@ export default function ApplicationWizardPage() {
         
         {/* Step 1: eKYC Verification */}
         {step === 1 && (
-          <div className="glass-panel p-8 rounded-3xl border border-slate-200 dark:border-slate-800 space-y-6 shadow-xl">
+          <div className="glass-panel p-8 rounded-3xl border border-slate-200 dark:border-slate-800 space-y-6 shadow-xl bg-white/90 dark:bg-slate-900/90 backdrop-blur-md">
             <div className="text-center space-y-2">
               <div className="w-14 h-14 rounded-2xl bg-gov-blue/10 text-gov-blue dark:text-blue-400 flex items-center justify-center mx-auto">
                 <ShieldCheck className="w-8 h-8" />
               </div>
-              <h2 className="text-2xl font-black text-slate-900 dark:text-white">Aadhaar Instant eKYC Verification</h2>
+              <h2 className="text-2xl font-black text-slate-900 dark:text-white">
+                {language === 'mr' ? 'आधार झटपट ई-केवायसी पडताळणी' : language === 'hi' ? 'आधार त्वरित ई-केवाईसी सत्यापन' : 'Aadhaar Instant eKYC Verification'}
+              </h2>
               <p className="text-xs text-slate-500 max-w-md mx-auto">
-                JanSahay AI integrates with MeitY eKYC sandbox to verify your identity using official Aadhaar OTP credentials.
+                {language === 'mr'
+                  ? 'जनसहाय एआय MeitY च्या डिजिटल ई-केवायसी द्वारे सुरक्षितपणे ओळख पडताळणी करते.'
+                  : language === 'hi'
+                  ? 'जनसहाय एआई MeitY के डिजिटल ई-केवाईसी द्वारा सुरक्षित रूप से पहचान सत्यापित करता है।'
+                  : 'JanSahay AI verifies your demographic credentials via MeitY secure DigiLocker / Aadhaar network.'}
               </p>
             </div>
 
@@ -142,20 +154,20 @@ export default function ApplicationWizardPage() {
                   type="text"
                   value={applicant.aadhaarNumber}
                   onChange={(e) => setApplicant({ ...applicant, aadhaarNumber: e.target.value })}
-                  className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl p-3 font-mono font-bold text-center tracking-widest text-slate-900 dark:text-white"
+                  className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl p-3 font-mono font-bold text-center tracking-widest text-slate-900 dark:text-white outline-none focus:border-gov-blue"
                 />
               </div>
 
               <div className="p-3 bg-emerald-500/10 rounded-xl border border-emerald-500/20 text-xs text-emerald-700 dark:text-emerald-300 flex items-center space-x-2">
                 <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
-                <span>Simulated eKYC Status: Verified (Aadhaar Linked)</span>
+                <span>eKYC Status: Verified (Aadhaar Seeded Bank Linked)</span>
               </div>
 
               <button
                 onClick={() => setStep(2)}
                 className="w-full py-3 bg-gradient-to-r from-gov-blue to-blue-700 text-white rounded-xl font-bold text-sm shadow hover:opacity-95 transition-opacity"
               >
-                Proceed to Document OCR Upload
+                {language === 'mr' ? 'कागदपत्रे अपलोडकडे पुढे जा' : language === 'hi' ? 'दस्तावेज़ अपलोड के लिए आगे बढ़ें' : 'Proceed to Document OCR Upload'}
               </button>
             </div>
           </div>
@@ -163,20 +175,24 @@ export default function ApplicationWizardPage() {
 
         {/* Step 2: Document OCR Scan & Auto-Fill */}
         {step === 2 && (
-          <div className="glass-panel p-8 rounded-3xl border border-slate-200 dark:border-slate-800 space-y-6 shadow-xl">
+          <div className="glass-panel p-8 rounded-3xl border border-slate-200 dark:border-slate-800 space-y-6 shadow-xl bg-white/90 dark:bg-slate-900/90 backdrop-blur-md">
             <div className="flex justify-between items-center border-b border-slate-200 dark:border-slate-800 pb-4">
               <div>
                 <h2 className="text-xl font-black text-slate-900 dark:text-white flex items-center space-x-2">
                   <Sparkles className="w-5 h-5 text-gov-saffron" />
-                  <span>AI Document OCR Extractor</span>
+                  <span>{language === 'mr' ? 'एआय कागदपत्रे ओसीआर स्कॅनर' : language === 'hi' ? 'एआई दस्तावेज़ ओसीआर स्कैनर' : 'AI Document OCR Extractor'}</span>
                 </h2>
                 <p className="text-xs text-slate-500">
-                  Upload required documents. Our AI vision model extracts fields and populates the application automatically.
+                  {language === 'mr'
+                    ? 'कागदपत्रे अपलोड करा. आमचे व्हिजन मॉडेल माहिती काढून फॉर्म आपोआप भरेल.'
+                    : language === 'hi'
+                    ? 'दस्तावेज़ अपलोड करें। हमारा विज़न मॉडल विवरण निकालकर फॉर्म स्वचालित भरेगा।'
+                    : 'Upload required documents. Our AI vision model extracts fields and populates the application automatically.'}
                 </p>
               </div>
 
               <span className="text-xs font-bold text-gov-blue bg-blue-500/10 px-3 py-1 rounded-full border border-blue-500/20">
-                {uploadedDocs.length} of {scheme.requiredDocs.length} Verified
+                {uploadedDocs.length} Verified
               </span>
             </div>
 
@@ -197,7 +213,7 @@ export default function ApplicationWizardPage() {
                     <div className="flex justify-between items-start">
                       <div>
                         <p className="font-bold text-sm text-slate-900 dark:text-white">{docType} Certificate</p>
-                        <p className="text-[11px] text-slate-500">Required format: PDF, PNG, JPG</p>
+                        <p className="text-[11px] text-slate-500">Format: PDF, PNG, JPG</p>
                       </div>
 
                       {isUploaded ? (
@@ -220,7 +236,7 @@ export default function ApplicationWizardPage() {
                         disabled={ocrLoading}
                         className="w-full py-2 bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 rounded-xl text-xs font-bold hover:bg-gov-blue hover:text-white transition-colors"
                       >
-                        {ocrLoading ? 'Scanning Document via AI OCR...' : `Simulate Upload & OCR (${docType})`}
+                        {ocrLoading ? 'Scanning...' : `Simulate AI Scan (${docType})`}
                       </button>
                     )}
                   </div>
@@ -248,30 +264,34 @@ export default function ApplicationWizardPage() {
 
         {/* Step 3: Form Details Confirmation */}
         {step === 3 && (
-          <div className="glass-panel p-8 rounded-3xl border border-slate-200 dark:border-slate-800 space-y-6 shadow-xl">
-            <div className="border-b border-slate-200 dark:border-slate-800 pb-3">
-              <h2 className="text-xl font-black text-slate-900 dark:text-white">Verify Auto-Filled Application Details</h2>
-              <p className="text-xs text-slate-500">Review all extracted information prior to final submission.</p>
+          <div className="glass-panel p-8 rounded-3xl border border-slate-200 dark:border-slate-800 space-y-6 shadow-xl bg-white/90 dark:bg-slate-900/90 backdrop-blur-md">
+            <div>
+              <h2 className="text-xl font-black text-slate-900 dark:text-white">
+                {language === 'mr' ? 'एआय ऑटो-फिल माहिती पडताळणी' : language === 'hi' ? 'एआई ऑटो-फिल विवरण समीक्षा' : 'AI Auto-Filled Application Form'}
+              </h2>
+              <p className="text-xs text-slate-500">
+                All fields below have been pre-filled from your verified Aadhaar and OCR documents.
+              </p>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
               <div>
-                <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">Full Applicant Name</label>
+                <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">Full Legal Name</label>
                 <input
                   type="text"
                   value={applicant.name}
                   onChange={(e) => setApplicant({ ...applicant, name: e.target.value })}
-                  className="w-full p-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl font-bold text-slate-900 dark:text-white"
+                  className="w-full p-2.5 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-300 dark:border-slate-700 font-bold text-slate-900 dark:text-white outline-none"
                 />
               </div>
 
               <div>
-                <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">PAN Number</label>
+                <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">Mobile Number</label>
                 <input
                   type="text"
-                  value={applicant.panNumber}
-                  onChange={(e) => setApplicant({ ...applicant, panNumber: e.target.value })}
-                  className="w-full p-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl font-mono font-bold text-slate-900 dark:text-white"
+                  value={applicant.phone}
+                  onChange={(e) => setApplicant({ ...applicant, phone: e.target.value })}
+                  className="w-full p-2.5 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-300 dark:border-slate-700 font-bold text-slate-900 dark:text-white outline-none"
                 />
               </div>
 
@@ -281,27 +301,17 @@ export default function ApplicationWizardPage() {
                   type="text"
                   value={applicant.bankAccount}
                   onChange={(e) => setApplicant({ ...applicant, bankAccount: e.target.value })}
-                  className="w-full p-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl font-mono font-bold text-slate-900 dark:text-white"
+                  className="w-full p-2.5 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-300 dark:border-slate-700 font-mono font-bold text-slate-900 dark:text-white outline-none"
                 />
               </div>
 
               <div>
-                <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">IFSC Code</label>
+                <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">Bank IFSC Code</label>
                 <input
                   type="text"
                   value={applicant.ifscCode}
                   onChange={(e) => setApplicant({ ...applicant, ifscCode: e.target.value })}
-                  className="w-full p-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl font-mono font-bold text-slate-900 dark:text-white"
-                />
-              </div>
-
-              <div className="sm:col-span-2">
-                <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">Permanent Residential Address</label>
-                <input
-                  type="text"
-                  value={applicant.address}
-                  onChange={(e) => setApplicant({ ...applicant, address: e.target.value })}
-                  className="w-full p-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl font-bold text-slate-900 dark:text-white"
+                  className="w-full p-2.5 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-300 dark:border-slate-700 font-mono font-bold text-slate-900 dark:text-white outline-none"
                 />
               </div>
             </div>
@@ -318,35 +328,47 @@ export default function ApplicationWizardPage() {
                 onClick={() => setStep(4)}
                 className="px-6 py-3 bg-gradient-to-r from-gov-blue to-blue-700 text-white rounded-xl font-bold text-xs shadow hover:opacity-95"
               >
-                Proceed to Review & Sign
+                Review & Confirm
               </button>
             </div>
           </div>
         )}
 
-        {/* Step 4: Review & E-Sign */}
+        {/* Step 4: Final Review */}
         {step === 4 && (
-          <div className="glass-panel p-8 rounded-3xl border border-slate-200 dark:border-slate-800 space-y-6 shadow-xl">
-            <div className="border-b border-slate-200 dark:border-slate-800 pb-3">
-              <h2 className="text-xl font-black text-slate-900 dark:text-white">Final Application Summary & Legal Declaration</h2>
-              <p className="text-xs text-slate-500">Sign electronically to complete submission.</p>
-            </div>
-
-            <div className="bg-slate-50 dark:bg-slate-800/60 p-4 rounded-2xl border border-slate-200 dark:border-slate-700 space-y-2 text-xs">
-              <p><strong>Applicant Name:</strong> {applicant.name}</p>
-              <p><strong>Aadhaar Hash:</strong> {applicant.aadhaarNumber}</p>
-              <p><strong>Scheme Name:</strong> {scheme.title}</p>
-              <p><strong>Target Bank Account:</strong> {applicant.bankAccount} ({applicant.ifscCode})</p>
-            </div>
-
-            <div className="p-4 bg-amber-500/10 rounded-2xl border border-amber-500/20 text-xs text-amber-900 dark:text-amber-300">
-              <p className="font-bold">Citizen Undertaking:</p>
-              <p className="mt-1 leading-relaxed">
-                I hereby declare that all details furnished above are accurate to the best of my knowledge. I understand that submitting false documents is punishable under Section 420 of the Indian Penal Code.
+          <div className="glass-panel p-8 rounded-3xl border border-slate-200 dark:border-slate-800 space-y-6 shadow-xl bg-white/90 dark:bg-slate-900/90 backdrop-blur-md">
+            <div>
+              <h2 className="text-xl font-black text-slate-900 dark:text-white">
+                {language === 'mr' ? 'अंतिम अर्ज पुनरावलोकन' : language === 'hi' ? 'अंतिम आवेदन समीक्षा' : 'Final Application Review'}
+              </h2>
+              <p className="text-xs text-slate-500">
+                Please confirm the details below before submitting directly to the Ministry portal.
               </p>
             </div>
 
-            <div className="flex justify-between items-center pt-2">
+            <div className="bg-slate-50 dark:bg-slate-800/80 p-5 rounded-2xl border border-slate-200 dark:border-slate-700 space-y-3 text-xs">
+              <div className="flex justify-between border-b border-slate-200 dark:border-slate-700 pb-2">
+                <span className="text-slate-500">Scheme Applied:</span>
+                <span className="font-extrabold text-slate-900 dark:text-white">{getSchemeTitle(scheme, language)}</span>
+              </div>
+
+              <div className="flex justify-between border-b border-slate-200 dark:border-slate-700 pb-2">
+                <span className="text-slate-500">Beneficiary Name:</span>
+                <span className="font-bold text-slate-900 dark:text-white">{applicant.name}</span>
+              </div>
+
+              <div className="flex justify-between border-b border-slate-200 dark:border-slate-700 pb-2">
+                <span className="text-slate-500">Aadhaar Linked Bank:</span>
+                <span className="font-mono font-bold text-slate-900 dark:text-white">{applicant.bankAccount} ({applicant.ifscCode})</span>
+              </div>
+
+              <div className="flex justify-between">
+                <span className="text-slate-500">Direct Benefit Sanction:</span>
+                <span className="font-extrabold text-emerald-600 dark:text-emerald-400">{getSchemeBenefit(scheme, language)}</span>
+              </div>
+            </div>
+
+            <div className="pt-4 flex justify-between items-center border-t border-slate-200 dark:border-slate-800">
               <button
                 onClick={() => setStep(3)}
                 className="px-4 py-2 text-slate-600 dark:text-slate-400 font-bold text-xs hover:underline"
@@ -356,57 +378,52 @@ export default function ApplicationWizardPage() {
 
               <button
                 onClick={submitApplication}
-                className="px-8 py-3.5 bg-gradient-to-r from-gov-green to-emerald-600 text-white rounded-xl font-extrabold text-sm shadow-lg hover:opacity-95 flex items-center space-x-2"
+                className="px-8 py-3.5 bg-gradient-to-r from-emerald-600 to-teal-700 text-white rounded-xl font-extrabold text-sm shadow-lg hover:opacity-95 flex items-center space-x-2"
               >
-                <CheckCircle2 className="w-5 h-5" />
-                <span>E-Sign & Submit Application</span>
+                <Check className="w-5 h-5" />
+                <span>Submit Application to Ministry</span>
               </button>
             </div>
           </div>
         )}
 
-        {/* Step 5: Application Receipt */}
+        {/* Step 5: Submission Receipt */}
         {step === 5 && (
-          <div className="glass-panel p-8 rounded-3xl border border-emerald-500/40 bg-emerald-500/5 dark:bg-emerald-950/20 space-y-6 text-center shadow-2xl">
-            <div className="w-16 h-16 rounded-full bg-emerald-500 text-white flex items-center justify-center mx-auto shadow-lg">
+          <div className="glass-panel p-8 sm:p-10 rounded-3xl border border-emerald-500/40 space-y-6 shadow-2xl bg-white/95 dark:bg-slate-900/95 backdrop-blur-md text-center">
+            <div className="w-16 h-16 rounded-full bg-emerald-500/20 text-emerald-500 flex items-center justify-center mx-auto border border-emerald-500/30">
               <CheckCircle2 className="w-10 h-10" />
             </div>
 
             <div className="space-y-1">
-              <h2 className="text-2xl font-black text-slate-900 dark:text-white">Application Submitted Successfully!</h2>
-              <p className="text-xs text-slate-500">Your application has been routed to the Department Nodal Verification Team.</p>
+              <h2 className="text-2xl font-black text-slate-900 dark:text-white">
+                {language === 'mr' ? 'अर्ज यशस्वीपणे सादर केला!' : language === 'hi' ? 'आवेदन सफलतापूर्वक जमा किया गया!' : 'Application Submitted Successfully!'}
+              </h2>
+              <p className="text-xs text-slate-500 max-w-md mx-auto">
+                Your application has been forwarded to the District Nodal Officer for verification.
+              </p>
             </div>
 
-            <div className="p-5 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 max-w-md mx-auto space-y-3">
-              <div>
-                <p className="text-[10px] text-slate-400 uppercase font-bold">Application Reference Number</p>
-                <p className="text-2xl font-black font-mono text-gov-blue dark:text-blue-400 tracking-wider">
-                  {applicationNo}
-                </p>
-              </div>
-
-              <div className="text-xs text-slate-600 dark:text-slate-400 space-y-1 border-t border-slate-100 dark:border-slate-800 pt-2">
-                <p><strong>Applicant:</strong> {applicant.name}</p>
-                <p><strong>Scheme:</strong> {scheme.title}</p>
-                <p><strong>Submitted Date:</strong> {new Date().toLocaleDateString()}</p>
-                <p><strong>SMS Alert Sent To:</strong> {applicant.phone}</p>
-              </div>
+            <div className="p-4 bg-slate-50 dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 max-w-md mx-auto space-y-2">
+              <p className="text-xs text-slate-400 font-bold uppercase">Application Reference Number</p>
+              <p className="text-2xl font-black font-mono text-gov-blue dark:text-blue-400">{applicationNo}</p>
+              <p className="text-[11px] text-slate-500">Save this reference number to trace your status.</p>
             </div>
 
-            <div className="flex flex-col sm:flex-row justify-center gap-3 pt-2">
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-4">
               <Link
                 href="/track"
-                className="px-6 py-3 bg-gov-blue text-white font-bold text-xs rounded-xl shadow hover:bg-blue-700"
+                className="w-full sm:w-auto px-6 py-3 bg-gov-blue text-white rounded-xl font-bold text-xs shadow hover:bg-blue-700 flex items-center justify-center space-x-1.5"
               >
-                Track Status Real-Time
+                <span>Track Status in Real-Time</span>
+                <ArrowRight className="w-4 h-4" />
               </Link>
-              <button
-                onClick={() => alert('Downloading Official Government Application Receipt PDF...')}
-                className="px-6 py-3 bg-slate-800 text-white font-bold text-xs rounded-xl shadow hover:bg-slate-700 flex items-center justify-center space-x-2"
+
+              <Link
+                href="/dashboard/citizen"
+                className="w-full sm:w-auto px-6 py-3 bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-white rounded-xl font-bold text-xs border border-slate-200 dark:border-slate-700 hover:bg-slate-200"
               >
-                <Download className="w-4 h-4" />
-                <span>Download Official Receipt PDF</span>
-              </button>
+                Go to Citizen Dashboard
+              </Link>
             </div>
           </div>
         )}

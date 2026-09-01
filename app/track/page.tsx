@@ -6,8 +6,6 @@ import {
   Search, 
   CheckCircle2, 
   Clock, 
-  AlertCircle, 
-  FileText, 
   IndianRupee, 
   Building2, 
   Phone, 
@@ -18,45 +16,69 @@ import {
 } from 'lucide-react';
 import { Navbar } from '@/components/navbar';
 import { Footer } from '@/components/footer';
+import { useTranslation } from '@/components/accessibility-provider';
 
 export default function TrackApplicationPage() {
+  const { t, language } = useTranslation();
   const [appNo, setAppNo] = useState('JAN-2026-891234');
   const [searched, setSearched] = useState(true);
 
   const mockTrackData = {
     applicationNo: 'JAN-2026-891234',
-    schemeTitle: 'Pradhan Mantri Kisan Samman Nidhi (PM-KISAN)',
-    applicantName: 'Rajesh Kumar Sharma',
+    schemeTitle: language === 'mr' 
+      ? 'प्रधानमंत्री किसान सन्मान निधी योजना (PM-KISAN)' 
+      : language === 'hi' 
+      ? 'प्रधानमंत्री किसान सम्मान निधि योजना (PM-KISAN)' 
+      : 'Pradhan Mantri Kisan Samman Nidhi (PM-KISAN)',
+    applicantName: 'Rajesh Kumar Sharma (राजेश कुमार शर्मा)',
     aadhaarHash: 'XXXX-XXXX-8912',
     submittedAt: '2026-07-28 14:30 IST',
-    currentStatus: 'UNDER_REVIEW', // SUBMITTED, VERIFIED, UNDER_REVIEW, APPROVED, COMPLETED
-    benefitAmount: '₹6,000 / year direct transfer',
-    district: 'Gautam Buddha Nagar, Uttar Pradesh',
+    currentStatus: language === 'mr' ? 'नोडल अधिकारी पुनरावलोकन' : language === 'hi' ? 'नोडल समीक्षाधीन' : 'Under Nodal Review',
+    benefitAmount: language === 'mr' ? '₹6,000 / वर्ष थेट बँक वाटप' : language === 'hi' ? '₹6,000 / वर्ष प्रत्यक्ष अंतरण' : '₹6,000 / year direct transfer',
+    district: language === 'mr' ? 'पुणे, महाराष्ट्र' : language === 'hi' ? 'गौतम बुद्ध नगर, उत्तर प्रदेश' : 'Pune, Maharashtra',
     timeline: [
-      { step: 'Application Submitted', date: '28 Jul 2026, 02:30 PM', done: true, remarks: 'Submitted via JanSahay AI Portal with Verified eKYC' },
-      { step: 'AI Document OCR Audit', date: '28 Jul 2026, 02:32 PM', done: true, remarks: 'Aadhaar, Land Khatoni, and SBI Passbook verified with 98% confidence' },
-      { step: 'District Nodal Officer Review', date: '29 Jul 2026, 11:15 AM', done: true, remarks: 'Assigned to Tehsildar Office (Gautam Buddha Nagar)' },
-      { step: 'Final Sanction & DBT Credit', date: 'Estimated: 02 Aug 2026', done: false, remarks: 'Direct Benefit Transfer pending Treasury Approval' }
-    ],
-    notifications: [
-      { type: 'SMS', to: '+91 98765 43210', text: 'JanSahay AI: Your application JAN-2026-891234 for PM-KISAN has been successfully forwarded to Tehsildar Office.', time: '28 Jul 14:31' },
-      { type: 'EMAIL', to: 'rajesh.sharma@example.com', text: 'Notification: Document OCR verification completed cleanly.', time: '28 Jul 14:32' }
+      { 
+        step: language === 'mr' ? 'अर्ज यशस्वीपणे सादर' : language === 'hi' ? 'आवेदन सफलतापूर्वक जमा' : 'Application Submitted', 
+        date: '28 Jul 2026, 02:30 PM', 
+        done: true, 
+        remarks: language === 'mr' ? 'सत्यापित ई-केवायसी सह जनसहाय एआय द्वारे सादर' : language === 'hi' ? 'जनसहाय एआई पोर्टल के माध्यम से ई-केवाईसी सत्यापित' : 'Submitted via JanSahay AI Portal with Verified eKYC' 
+      },
+      { 
+        step: language === 'mr' ? 'कागदपत्रे एआय ओसीआर पडताळणी' : language === 'hi' ? 'दस्तावेज़ एआई ओसीआर सत्यापन' : 'AI Document OCR Audit', 
+        date: '28 Jul 2026, 02:32 PM', 
+        done: true, 
+        remarks: language === 'mr' ? 'आधार, ७/१२ आणि बँक पासबुक ९८% अचूकतेसह मंजूर' : language === 'hi' ? 'आधार, खतौनी और बैंक पासबुक 98% सटीकता से सत्यापित' : 'Aadhaar, Land Records, and Passbook verified with 98% confidence' 
+      },
+      { 
+        step: language === 'mr' ? 'जिल्हा नोडल अधिकारी तपासणी' : language === 'hi' ? 'जिला नोडल अधिकारी समीक्षा' : 'District Nodal Officer Review', 
+        date: '29 Jul 2026, 11:15 AM', 
+        done: true, 
+        remarks: language === 'mr' ? 'तहसीलदार कार्यालयाकडे तपासणीसाठी सोपवले' : language === 'hi' ? 'तहसीलदार कार्यालय को प्रेषित' : 'Assigned to Tehsildar Office for field report' 
+      },
+      { 
+        step: language === 'mr' ? 'अंतिम मंजुरी व डीबीटी जमा' : language === 'hi' ? 'अंतिम स्वीकृति एवं डीबीटी क्रेडिट' : 'Final Sanction & DBT Credit', 
+        date: language === 'mr' ? 'अंदाजे: ०२ ऑगस्ट २०२६' : language === 'hi' ? 'अनुमानित: 02 अगस्त 2026' : 'Estimated: 02 Aug 2026', 
+        done: false, 
+        remarks: language === 'mr' ? 'तिजोरी मंजुरीनंतर थेट बँक खात्यात रक्कम जमा होईल' : language === 'hi' ? 'कोषागार अनुमोदन के बाद सीधे बैंक खाते में भुगतान' : 'Direct Benefit Transfer pending Treasury Approval' 
+      }
     ]
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-gov-bg dark:bg-gov-darkBg">
+    <div className="min-h-screen flex flex-col bg-gov-bg dark:bg-gov-darkBg transition-colors">
       <Navbar />
 
       {/* Header Search */}
       <section className="bg-gradient-to-r from-gov-darkBg via-slate-900 to-gov-darkBg text-white py-12 px-4 border-b border-slate-800">
         <div className="max-w-4xl mx-auto space-y-4 text-center">
           <span className="bg-gov-blue/20 text-gov-blue dark:text-blue-400 font-extrabold text-xs px-3 py-1 rounded-full border border-blue-500/30">
-            Real-Time Public Tracker
+            {language === 'mr' ? 'थेट रिअल-टाइम ट्रॅकर' : language === 'hi' ? 'लाइव रीयल-टाइम ट्रैकर' : 'Real-Time Public Tracker'}
           </span>
-          <h1 className="text-3xl sm:text-4xl font-extrabold">Track Application Status</h1>
+          <h1 className="text-3xl sm:text-4xl font-extrabold">
+            {t('track_title', 'Track Application Status in Real-Time')}
+          </h1>
           <p className="text-slate-400 text-sm max-w-xl mx-auto">
-            Enter your Application Reference Number (e.g. JAN-2026-891234) or registered Mobile Number to trace your application lifecycle.
+            {t('track_subtitle', 'Enter your 12-digit Application Reference Number or registered Mobile/Aadhaar to inspect nodal verification stages.')}
           </p>
 
           <div className="pt-2 max-w-xl mx-auto flex gap-2">
@@ -64,17 +86,17 @@ export default function TrackApplicationPage() {
               <Search className="w-5 h-5 absolute left-3.5 top-3.5 text-slate-400" />
               <input
                 type="text"
-                placeholder="Enter Application Ref No (e.g. JAN-2026-891234)"
+                placeholder={language === 'mr' ? 'उदा. JAN-2026-891234' : language === 'hi' ? 'उदा. JAN-2026-891234' : 'Enter Ref No (e.g. JAN-2026-891234)'}
                 value={appNo}
                 onChange={(e) => setAppNo(e.target.value)}
-                className="w-full pl-11 pr-4 py-3 bg-slate-800 text-white rounded-xl border border-slate-700 font-mono font-bold text-sm"
+                className="w-full pl-11 pr-4 py-3 bg-slate-800 text-white rounded-xl border border-slate-700 font-mono font-bold text-sm outline-none focus:border-gov-blue"
               />
             </div>
             <button
               onClick={() => setSearched(true)}
-              className="px-6 py-3 bg-gov-blue text-white rounded-xl font-bold text-sm shadow hover:bg-blue-700"
+              className="px-6 py-3 bg-gov-blue text-white rounded-xl font-bold text-sm shadow hover:bg-blue-700 transition-colors"
             >
-              Track Now
+              {t('track_btn', 'Track Status')}
             </button>
           </div>
         </div>
@@ -84,70 +106,64 @@ export default function TrackApplicationPage() {
         <main className="max-w-5xl mx-auto px-4 py-8 flex-1 w-full space-y-8">
           
           {/* Main Status Header Card */}
-          <div className="glass-panel p-6 sm:p-8 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-xl space-y-6">
+          <div className="glass-panel p-6 sm:p-8 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-xl space-y-6 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-slate-200 dark:border-slate-800 pb-4 gap-4">
               <div>
                 <span className="text-xs font-mono font-bold text-gov-blue">Ref: {mockTrackData.applicationNo}</span>
                 <h2 className="text-xl font-black text-slate-900 dark:text-white mt-1">
                   {mockTrackData.schemeTitle}
                 </h2>
-                <p className="text-xs text-slate-500">Applicant: {mockTrackData.applicantName} ({mockTrackData.aadhaarHash})</p>
+                <p className="text-xs text-slate-500">
+                  {t('track_applicant_name', 'Applicant Name')}: <strong className="text-slate-700 dark:text-slate-300">{mockTrackData.applicantName}</strong> ({mockTrackData.aadhaarHash})
+                </p>
               </div>
 
               <div className="bg-amber-500/10 text-amber-600 dark:text-amber-400 px-4 py-2 rounded-xl border border-amber-500/20 text-xs font-extrabold flex items-center space-x-2">
                 <Clock className="w-4 h-4 animate-spin" />
-                <span>Status: Under Nodal Review</span>
+                <span>Status: {mockTrackData.currentStatus}</span>
               </div>
             </div>
 
-            {/* Stepper Timeline */}
-            <div className="space-y-6 pt-2">
-              <h3 className="font-extrabold text-base text-slate-900 dark:text-white">
-                Application Lifecycle Stages
+            {/* Timeline View */}
+            <div className="space-y-6">
+              <h3 className="font-extrabold text-sm text-slate-800 dark:text-slate-200">
+                {language === 'mr' ? 'पडताळणी प्रगती टप्पे' : language === 'hi' ? 'सत्यापन प्रगति चरण' : 'Verification Stages'}
               </h3>
 
-              <div className="relative pl-6 space-y-6 border-l-2 border-slate-200 dark:border-slate-800">
+              <div className="relative pl-6 border-l-2 border-slate-200 dark:border-slate-800 space-y-8">
                 {mockTrackData.timeline.map((item, idx) => (
-                  <div key={idx} className="relative group">
-                    {/* Node Dot */}
+                  <div key={idx} className="relative">
                     <div
-                      className={`absolute -left-[31px] top-0 w-6 h-6 rounded-full flex items-center justify-center font-bold text-xs ${
+                      className={`absolute -left-[31px] top-0 w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${
                         item.done
-                          ? 'bg-emerald-500 text-white shadow'
+                          ? 'bg-emerald-500 text-white'
                           : 'bg-slate-300 dark:bg-slate-700 text-slate-500'
                       }`}
                     >
-                      {item.done ? <CheckCircle2 className="w-4 h-4" /> : idx + 1}
+                      {item.done ? '✓' : idx + 1}
                     </div>
 
-                    <div className="bg-white dark:bg-slate-900/80 p-4 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-1">
-                      <div className="flex justify-between items-center">
-                        <h4 className="font-extrabold text-sm text-slate-900 dark:text-white">{item.step}</h4>
-                        <span className="text-[11px] text-slate-400 font-medium">{item.date}</span>
+                    <div className="space-y-1">
+                      <div className="flex items-center justify-between">
+                        <p className="font-bold text-sm text-slate-900 dark:text-white">{item.step}</p>
+                        <span className="text-[11px] font-mono text-slate-400">{item.date}</span>
                       </div>
-                      <p className="text-xs text-slate-600 dark:text-slate-400">{item.remarks}</p>
+                      <p className="text-xs text-slate-500 dark:text-slate-400">{item.remarks}</p>
                     </div>
                   </div>
                 ))}
               </div>
             </div>
 
-            {/* SMS & Email Logs */}
-            <div className="pt-4 border-t border-slate-200 dark:border-slate-800 space-y-3">
-              <h4 className="font-bold text-sm text-slate-900 dark:text-white flex items-center space-x-2">
-                <MessageSquare className="w-4 h-4 text-gov-blue" />
-                <span>Real-Time Dispatch Notifications</span>
-              </h4>
-
-              <div className="space-y-2">
-                {mockTrackData.notifications.map((n, idx) => (
-                  <div key={idx} className="p-3 bg-slate-50 dark:bg-slate-900 rounded-xl text-xs flex items-center justify-between border border-slate-200 dark:border-slate-800">
-                    <span className="font-bold text-gov-blue">{n.type} Dispatch</span>
-                    <span className="text-slate-600 dark:text-slate-300 truncate max-w-md">{n.text}</span>
-                    <span className="text-slate-400 text-[10px]">{n.time}</span>
-                  </div>
-                ))}
+            {/* Benefit Box */}
+            <div className="p-4 bg-emerald-500/10 dark:bg-emerald-950/30 rounded-2xl border border-emerald-500/20 flex flex-col sm:flex-row justify-between items-center gap-2">
+              <div>
+                <p className="text-xs font-bold text-emerald-800 dark:text-emerald-300">
+                  {language === 'mr' ? 'मंजूर आर्थिक लाभ' : language === 'hi' ? 'स्वीकृत वित्तीय लाभ' : 'Sanctioned Welfare Benefit'}
+                </p>
+                <p className="text-lg font-black text-emerald-600 dark:text-emerald-400">{mockTrackData.benefitAmount}</p>
               </div>
+              <span className="text-xs text-slate-500 font-semibold">{mockTrackData.district}</span>
             </div>
 
           </div>

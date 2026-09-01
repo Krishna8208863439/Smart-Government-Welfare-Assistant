@@ -13,11 +13,6 @@
     --background: 222.2 84% 4.9%;
     --foreground: 210 40% 98%;
   }
-
-  .high-contrast {
-    --background: 0 0% 0%;
-    --foreground: 0 0% 100%;
-  }
 }
 
 body {
@@ -40,23 +35,6 @@ body {
   border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
-.high-contrast .glass-panel {
-  background: #000000;
-  border: 2px solid #FFFF00;
-  color: #FFFFFF;
-}
-
-.high-contrast button {
-  border: 2px solid #FFFF00 !important;
-  color: #FFFF00 !important;
-  background: #000000 !important;
-}
-
-.high-contrast a {
-  color: #00FFFF !important;
-  text-decoration: underline !important;
-}
-
 /* Custom Scrollbars */
 ::-webkit-scrollbar {
   width: 8px;
@@ -74,4 +52,17 @@ body {
 
 .dark ::-webkit-scrollbar-thumb {
   background: #334155;
+}
+
+/* Hide Next.js Development Indicator / Route Toast Overlay */
+nextjs-portal,
+#__next-build-watcher,
+[data-nextjs-dev-tools],
+[data-nextjs-toast],
+[data-nextjs-route-announcer],
+[data-next-badge],
+div[data-nextjs-dialog-overlay] {
+  display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
 }

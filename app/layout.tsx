@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import './globals.css';
 import { AccessibilityProvider } from '@/components/accessibility-provider';
+import { AuthProvider } from '@/lib/auth-context';
 
 export const metadata: Metadata = {
   title: 'JanSahay AI – Smart Government Welfare Assistant',
@@ -17,7 +18,9 @@ export default function RootLayout({
     <html lang="en">
       <body>
         <AccessibilityProvider>
-          {children}
+          <AuthProvider>
+            {children}
+          </AuthProvider>
         </AccessibilityProvider>
       </body>
     </html>
